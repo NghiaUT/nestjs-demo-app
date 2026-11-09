@@ -3,8 +3,9 @@ import { AppModule } from './app.module.js';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
-import { LoggingInterceptor } from './interceptors/logging.interceptor.js';
-import { HttpExcpetionFilter } from './filters/http-exception.filter.js';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+import { HttpExcpetionFilter } from './common/filters/http-exception.filter.js';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);
@@ -15,7 +16,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExcpetionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor(),
+  );
   app.use(helmet());
   app.use((req: Request, res: Response, next: NextFunction) => {
     logger.debug('===TRIGGER GLOBAL MIDDLEWARE===');

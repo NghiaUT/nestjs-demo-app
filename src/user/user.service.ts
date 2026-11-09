@@ -12,12 +12,13 @@ export class UserService {
   private userId = 1;
   private userList: User[] = [
     {
-      id: '1',
+      id: '0',
       name: 'Nghĩa',
       email: 'nghia@gmail.com',
       department: 'Support',
       age: 30,
       isManager: true,
+      password: '123',
     },
   ];
 
@@ -30,22 +31,15 @@ export class UserService {
 
   @Log
   findAll(params: ParamQueryDto) {
-    if (!params || Object.keys(params).length === 0) {
-      return this.userList;
-    }
+    const validKeys = (
+      Object.keys(params ?? {}) as (keyof ParamQueryDto)[]
+    ).filter((key) => params[key] !== undefined);
 
-    // Chỉ lấy những key thực sự có giá trị (loại bỏ undefined)
-    const validKeys = (Object.keys(params) as (keyof ParamQueryDto)[]).filter(
-      (key) => params[key] !== undefined,
-    );
-
-    if (validKeys.length === 0) {
-      return this.userList;
-    }
-
-    return this.userList.filter((user) =>
+    const users = this.userList.filter((user) =>
       validKeys.every((key) => user[key] === params[key]),
     );
+
+    return users.map(({ password, ...user }) => user);
   }
 
   findOne(id: number) {
@@ -86,5 +80,11 @@ export class UserService {
       message: `Đã xóa thành công user #${id}`,
       deletedUser: deletedUser[0],
     };
+  }
+
+  findWithEmail(email: string): User | undefined {
+    const user = this.userList.find((u) => u.email === email);
+
+    return user;
   }
 }

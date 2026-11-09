@@ -5,7 +5,9 @@ import { UserModule } from './user/user.module.js';
 import { VersionMiddleware } from './middlewares/version.middleware.js';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { CustomThrottlerGuard } from './guards/throttler.guard.js';
+import { CustomThrottlerGuard } from './common/guards/throttler.guard.js';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { CustomThrottlerGuard } from './guards/throttler.guard.js';
       ],
     }),
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -27,10 +27,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { JwtAuthorizationGuard } from '../guards/jwt-auth.guard.js';
-import { OwnershipGuard } from '../guards/ownership.guard.js';
-import { TimeoutInterceptor } from '../interceptors/timeout.interceptor.js';
-import { ExcludeNullInterceptor } from '../interceptors/exclude-null.interceptor.js';
+import { JwtAuthorizationGuard } from '../common/guards/jwt-auth.guard.js';
+import { OwnershipGuard } from '../common/guards/ownership.guard.js';
+import { TimeoutInterceptor } from '../common/interceptors/timeout.interceptor.js';
+import { ExcludeNullInterceptor } from '../common/interceptors/exclude-null.interceptor.js';
+import { AppConfigService } from '../config/config.service.js';
 
 export class ParamQueryDto {
   @IsOptional()
@@ -57,7 +58,10 @@ export class ParamQueryDto {
 @Controller('users')
 export class UserController {
   logger = new Logger(UserController.name);
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: AppConfigService,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -67,10 +71,11 @@ export class UserController {
   @Get()
   @UseGuards(OwnershipGuard)
   @UseInterceptors(ExcludeNullInterceptor)
-  async findAll(@Query() params: ParamQueryDto, @Res() response: Response) {
+  findAll(@Query() params: ParamQueryDto) {
     this.logger.log(`Method name: ${this.findAll.name}`);
-    const data = await this.userService.findAll(params);
-    response.status(200).json(data);
+    console.log('DB_HOST ' + this.configService.database().host);
+    const data = this.userService.findAll(params);
+    return data;
   }
 
   @Get(':id')

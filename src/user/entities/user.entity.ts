@@ -7,6 +7,7 @@ export class User {
   age: number;
   department: Department;
   isManager: boolean;
+  password: string;
 
   constructor(init?: Partial<User>) {
     this.id = init?.id ?? '';
@@ -15,5 +16,6 @@ export class User {
     this.age = init?.age ?? 0;
     this.department = init?.department ?? 'Support';
     this.isManager = init?.isManager ?? false;
+    this.password = init?.password ?? '123';
   }
 }

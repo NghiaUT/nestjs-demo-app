@@ -22,4 +22,7 @@ export class CreateUserDto {
 
   @IsBoolean()
   isManager: boolean;
+
+  @IsString()
+  password: string;
 }
