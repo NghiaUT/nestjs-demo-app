@@ -29,4 +29,10 @@ export class AppConfigService {
       expiresIn: this.config.getOrThrow<number>('JWT_EXPIRES_IN'),
     };
   }
+
+  redis() {
+    return {
+      url: this.config.getOrThrow<string>('REDIS_URL'),
+    };
+  }
 }
