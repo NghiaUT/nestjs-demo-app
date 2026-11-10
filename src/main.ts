@@ -25,6 +25,7 @@ async function bootstrap() {
     logger.debug('===TRIGGER GLOBAL MIDDLEWARE===');
     next();
   });
+  app.enableShutdownHooks();
 
   await app.listen(process.env.PORT ?? 3000);
 }

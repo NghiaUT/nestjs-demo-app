@@ -12,6 +12,7 @@ import {
   Logger,
   UseInterceptors,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -32,6 +33,7 @@ import { OwnershipGuard } from '../common/guards/ownership.guard.js';
 import { TimeoutInterceptor } from '../common/interceptors/timeout.interceptor.js';
 import { ExcludeNullInterceptor } from '../common/interceptors/exclude-null.interceptor.js';
 import { AppConfigService } from '../config/config.service.js';
+import { Public } from '../common/decorators/public.decorator.js';
 
 export class ParamQueryDto {
   @IsOptional()
@@ -71,6 +73,8 @@ export class UserController {
   @Get()
   @UseGuards(OwnershipGuard)
   @UseInterceptors(ExcludeNullInterceptor)
+  @Inject('APP_VER')
+  @Public()
   findAll(@Query() params: ParamQueryDto) {
     this.logger.log(`Method name: ${this.findAll.name}`);
     console.log('DB_HOST ' + this.configService.database().host);

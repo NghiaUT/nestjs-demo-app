@@ -14,7 +14,6 @@ export class TransformInterceptor<T> implements NestInterceptor {
     // NOTICE: CONTROLLER INTERCEPTOR
     const response = context.switchToHttp().getResponse<Response>();
     const statusCode = response.statusCode ?? 200;
-    console.log('Hello');
     return next.handle().pipe(
       map((data: T) => ({
         statusCode,
