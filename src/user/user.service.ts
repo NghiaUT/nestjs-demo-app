@@ -1,89 +1,92 @@
 import { Injectable, NotFoundException, Res } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { User } from './entities/user.entity.js';
 import { type ParamQueryDto } from './user.controller.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from './schemas/user.schema.js';
+import { Model, QueryFilter } from 'mongoose';
 
 function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   console.log(`Method ${propertyKey} đã được đăng ký!`);
 }
 @Injectable()
 export class UserService {
-  private userId = 1;
-  private userList: User[] = [
-    {
-      id: '0',
-      name: 'Nghĩa',
-      email: 'nghia@gmail.com',
-      department: 'Support',
-      age: 30,
-      isManager: true,
-      password: '123',
-    },
-  ];
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user = new User({ id: this.userId.toString(), ...createUserDto });
-    this.userList.push(user);
-    this.userId += 1;
-    return { user, message: 'This action create a new user' };
+  async create(createUserDto: CreateUserDto) {
+    const createdUser = new this.userModel(createUserDto);
+    const savedUser = (await createdUser.save()).toObject();
+
+    const { password, ...user } = savedUser;
+    return {
+      user,
+      message: 'This action create a new user',
+    };
   }
 
   @Log
-  findAll(params: ParamQueryDto) {
-    const validKeys = (
-      Object.keys(params ?? {}) as (keyof ParamQueryDto)[]
-    ).filter((key) => params[key] !== undefined);
+  async findAll(params: ParamQueryDto) {
+    const filter: QueryFilter<User> = {};
 
-    const users = this.userList.filter((user) =>
-      validKeys.every((key) => user[key] === params[key]),
-    );
+    if (params.name) {
+      filter.name = { $regex: params.name, $options: 'i' };
+    }
 
-    return users.map(({ password, ...user }) => user);
+    if (params.age) {
+      filter.age = params.age;
+    }
+
+    if (params.department) {
+      filter.department = params.department;
+    }
+
+    if (params.isManager !== undefined) {
+      filter.isManager = params.isManager;
+    }
+
+    return this.userModel
+      .find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
-  findOne(id: number) {
-    const user = this.userList.find((user) => user.id === id.toString());
+  async findOne(id: string) {
+    const user = await this.userModel.findById(id).exec();
     if (!user) throw new NotFoundException(`Không tìm thấy user với id #${id}`);
-    return user ? user : `Không tìm thấy user với id #${id}`;
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    const userIndex = this.userList.findIndex(
-      (user) => user.id === id.toString(),
-    );
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, { runValidators: true })
+      .select('-password')
+      .exec();
 
-    if (userIndex === -1) {
-      return `Không tìm thấy user với id #${id}`;
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy user với id #${id}`);
     }
 
-    this.userList[userIndex] = {
-      ...this.userList[userIndex],
-      ...updateUserDto,
-    };
-
-    return this.userList[userIndex];
+    return user;
   }
 
-  remove(id: number) {
-    const userIndex = this.userList.findIndex(
-      (user) => user.id === id.toString(),
-    );
+  async remove(id: string) {
+    const removeUser = await this.userModel.deleteOne({ _id: id }).exec();
 
-    if (userIndex === -1) {
+    if (removeUser.deletedCount === 0) {
       return `Không tìm thấy user với id #${id}`;
     }
-
-    const deletedUser = this.userList.splice(userIndex, 1);
 
     return {
       message: `Đã xóa thành công user #${id}`,
-      deletedUser: deletedUser[0],
     };
   }
 
-  findWithEmail(email: string): User | undefined {
-    const user = this.userList.find((u) => u.email === email);
+  async findWithEmail(email: string) {
+    const user = await this.userModel
+      .findOne({ email: email })
+      .select('-password')
+      .exec();
 
     return user;
   }

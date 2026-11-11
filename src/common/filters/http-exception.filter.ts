@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
+import { sendErrorResponse } from '../../util/err-response.util.js';
 
 @Catch(HttpException)
 export class HttpExcpetionFilter implements ExceptionFilter {
@@ -16,13 +17,8 @@ export class HttpExcpetionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     // NOTICE: GLOBAL FILTER
-    this.logger.debug('===TRIGGER GLOBAL FILTER===');
-    response.status(status).json({
-      statusCode: status,
-      message: exception.message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+    this.logger.debug('===[Error] TRIGGER GLOBAL FILTER===');
+    sendErrorResponse(response, status, exception.message);
   }
   logger = new Logger(HttpException.name);
 }

@@ -2,12 +2,17 @@ import { Logger, Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { UserController } from './user.controller.js';
 import { AppConfigModule } from '../config/config.module.js';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from './schemas/user.schema.js';
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
-  imports: [AppConfigModule],
+  imports: [
+    AppConfigModule,
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+  ],
 })
 export class UserModule implements OnModuleInit, OnModuleDestroy {
   logger = new Logger(UserModule.name);

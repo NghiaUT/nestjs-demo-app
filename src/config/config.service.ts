@@ -35,4 +35,10 @@ export class AppConfigService {
       url: this.config.getOrThrow<string>('REDIS_URL'),
     };
   }
+
+  mongo() {
+    return {
+      uri: this.config.getOrThrow<string>('MONGODB_URI'),
+    };
+  }
 }

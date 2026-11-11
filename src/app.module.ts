@@ -13,7 +13,9 @@ import {
   createRedisClient,
 } from './utils/db-mock.connection.js';
 import { AppConfigService } from './config/config.service.js';
+import { AppConfigModule } from './config/config.module.js';
 import { JwtAuthorizationGuard } from './common/guards/jwt-auth.guard.js';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -28,6 +30,15 @@ import { JwtAuthorizationGuard } from './common/guards/jwt-auth.guard.js';
     UserModule,
     AuthModule,
     PaymentModule,
+    MongooseModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (appConfigService: AppConfigService) => ({
+        uri: appConfigService.mongo().uri,
+
+        serverSelectionTimeoutMS: 5000,
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [
