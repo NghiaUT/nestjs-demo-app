@@ -75,6 +75,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(VersionMiddleware).forRoutes('/users');
+    // consumer.apply(VersionMiddleware).forRoutes('/users');
   }
 }
