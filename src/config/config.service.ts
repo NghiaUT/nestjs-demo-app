@@ -29,4 +29,10 @@ export class AppConfigService {
       expiresIn: this.config.getOrThrow<number>('JWT_EXPIRES_IN'),
     };
   }
+
+  mongo() {
+    return {
+      uri: this.config.getOrThrow<string>('MONGODB_URI'),
+    };
+  }
 }

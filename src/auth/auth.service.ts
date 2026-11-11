@@ -2,33 +2,38 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoginRequestDto } from './dto/request.dto.js';
 import { CreateUserDto } from '../user/dto/create-user.dto.js';
 import { UserService } from '../user/user.service.js';
-import { User } from '../user/entities/user.entity.js';
+import { User } from '../user/schemas/user.schema.js';
 
 type ReturnUser = Omit<User, 'password'>;
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserService) {}
-  register(registerRequestDto: CreateUserDto): {
+  async register(registerRequestDto: CreateUserDto): Promise<{
     user: ReturnUser;
     token: string;
-  } {
-    const existUser = this.userService.findWithEmail(registerRequestDto.email);
+  }> {
+    const existUser = await this.userService.findWithEmail(
+      registerRequestDto.email,
+    );
     if (existUser)
       throw new BadRequestException(
         'Email đã được sử dụng. Vui lòng đổi email khác.',
       );
+    const result = await this.userService.create(registerRequestDto);
     return {
-      user: this.userService.create(registerRequestDto).user,
+      user: result.user,
       token: 'valid',
     };
   }
 
-  login(loginRequestDto: LoginRequestDto): { user: ReturnUser; token: string } {
-    const user = this.userService.findWithEmail(loginRequestDto.email);
+  async login(
+    loginRequestDto: LoginRequestDto,
+  ): Promise<{ user: ReturnUser; token: string }> {
+    const user = await this.userService.findWithEmail(loginRequestDto.email);
     if (!user)
       throw new BadRequestException('Email chưa tồn tại trong hệ thống.');
     return {
-      user: user,
+      user,
       token: 'valid',
     };
   }

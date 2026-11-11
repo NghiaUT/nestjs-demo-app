@@ -16,8 +16,7 @@ import {
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
-import { type Response } from 'express';
-import { type Department } from './entities/user.entity.js';
+import { Department } from './entities/user.entity.js';
 
 import { Transform } from 'class-transformer';
 import {
@@ -32,6 +31,7 @@ import { OwnershipGuard } from '../common/guards/ownership.guard.js';
 import { TimeoutInterceptor } from '../common/interceptors/timeout.interceptor.js';
 import { ExcludeNullInterceptor } from '../common/interceptors/exclude-null.interceptor.js';
 import { AppConfigService } from '../config/config.service.js';
+import { User } from './schemas/user.schema.js';
 
 export class ParamQueryDto {
   @IsOptional()
@@ -44,7 +44,7 @@ export class ParamQueryDto {
   age?: number;
 
   @IsOptional()
-  @IsEnum(['IT', 'Sales', 'Support'])
+  @IsEnum(Object.values(Department))
   department?: Department;
 
   @IsOptional()
@@ -64,33 +64,31 @@ export class UserController {
   ) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.create(createUserDto);
   }
 
   @Get()
   @UseGuards(OwnershipGuard)
   @UseInterceptors(ExcludeNullInterceptor)
-  findAll(@Query() params: ParamQueryDto) {
-    this.logger.log(`Method name: ${this.findAll.name}`);
-    console.log('DB_HOST ' + this.configService.database().host);
-    const data = this.userService.findAll(params);
+  async findAll(@Query() params: ParamQueryDto) {
+    const data = await this.userService.findAll(params);
     return data;
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(OwnershipGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
   }
 }

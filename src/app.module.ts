@@ -6,8 +6,10 @@ import { VersionMiddleware } from './middlewares/version.middleware.js';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CustomThrottlerGuard } from './common/guards/throttler.guard.js';
-import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module.js';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AppConfigService } from './config/config.service.js';
+import { AppConfigModule } from './config/config.module.js';
 
 @Module({
   imports: [
@@ -21,6 +23,15 @@ import { AuthModule } from './auth/auth.module.js';
     }),
     UserModule,
     AuthModule,
+    MongooseModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (appConfigService: AppConfigService) => ({
+        uri: appConfigService.mongo().uri,
+
+        serverSelectionTimeoutMS: 5000,
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [

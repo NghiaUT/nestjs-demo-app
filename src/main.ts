@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 import { HttpExcpetionFilter } from './common/filters/http-exception.filter.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
+import { MongoseExceptionFilter } from './common/filters/mongoose-exception.filter.js';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);
@@ -15,7 +16,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalFilters(new HttpExcpetionFilter());
+  app.useGlobalFilters(new HttpExcpetionFilter(), new MongoseExceptionFilter());
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TransformInterceptor(),
