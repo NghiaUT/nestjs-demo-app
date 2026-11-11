@@ -25,6 +25,9 @@ export class User {
 
   @Prop({ required: true, select: true })
   password: string;
+
+  @Prop({ default: 0, min: 0 })
+  balance: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

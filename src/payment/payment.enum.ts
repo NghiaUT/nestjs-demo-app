@@ -9,3 +9,10 @@ export enum PaymentStatus {
   FAILED = 'FAILED',
   SUCCESS = 'SUCCESS',
 }
+
+export enum PaymentType {
+  TRANSFER = 'TRANSFER',
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAW = 'WITHDRAW',
+  PAY = 'PAY',
+}

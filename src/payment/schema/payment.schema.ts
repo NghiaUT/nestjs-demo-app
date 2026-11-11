@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { PaymentMethod, PaymentStatus } from '../payment.enum.js';
+import { PaymentMethod, PaymentStatus, PaymentType } from '../payment.enum.js';
 import { HydratedDocument } from 'mongoose';
 
 export type PaymentDocument = HydratedDocument<Payment>;
@@ -21,6 +21,13 @@ export class Payment {
     default: PaymentStatus.PENDING,
   })
   status: PaymentStatus;
+
+  @Prop({
+    required: true,
+    enum: Object.values(PaymentType),
+    default: PaymentType.PAY,
+  })
+  type: PaymentType;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
