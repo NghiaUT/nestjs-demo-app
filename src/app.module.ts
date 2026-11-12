@@ -17,6 +17,8 @@ import { AppConfigModule } from './config/config.module.js';
 import { JwtAuthorizationGuard } from './common/guards/jwt-auth.guard.js';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_VER } from './common/constants/constants.js';
+import { DatabaseModule } from './infrastructure/database/database.module.js';
+import { CacheModule } from './infrastructure/cache/cache.module.js';
 
 @Module({
   imports: [
@@ -28,9 +30,8 @@ import { APP_VER } from './common/constants/constants.js';
         },
       ],
     }),
-    UserModule,
-    AuthModule,
-    PaymentModule,
+    DatabaseModule,
+    CacheModule,
     MongooseModule.forRootAsync({
       imports: [AppConfigModule],
       inject: [AppConfigService],
@@ -40,6 +41,9 @@ import { APP_VER } from './common/constants/constants.js';
         serverSelectionTimeoutMS: 5000,
       }),
     }),
+    UserModule,
+    AuthModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
@@ -51,22 +55,6 @@ import { APP_VER } from './common/constants/constants.js';
     {
       provide: APP_GUARD,
       useClass: JwtAuthorizationGuard,
-    },
-    {
-      provide: 'DATABASE_CONNECTION',
-      useFactory: async () => {
-        const connection = await createDBConnection();
-        console.log(connection);
-      },
-    },
-    {
-      provide: 'REDIS_CONNECTION',
-      useFactory: async (configService: AppConfigService) => {
-        const client = createRedisClient(configService.redis().url);
-        await client.connect(); // Mất khoảng 2 giây để kết nối thành công
-        return client;
-      },
-      inject: [AppConfigService],
     },
   ],
 })
