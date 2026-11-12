@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { Response } from 'express';
 import mongoose from 'mongoose';
-import { sendErrorResponse } from '../../util/err-response.util.js';
+import { sendErrorResponse } from '../../utils/err-response.util.js';
 
 @Catch(mongoose.Error)
 export class MongoseExceptionFilter implements ExceptionFilter {
