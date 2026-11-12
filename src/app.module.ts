@@ -16,6 +16,9 @@ import { AppConfigService } from './config/config.service.js';
 import { AppConfigModule } from './config/config.module.js';
 import { JwtAuthorizationGuard } from './common/guards/jwt-auth.guard.js';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OrderModule } from './order/order.module.js';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategy';
 
 @Module({
   imports: [
@@ -39,6 +42,22 @@ import { MongooseModule } from '@nestjs/mongoose';
         serverSelectionTimeoutMS: 5000,
       }),
     }),
+    TypeOrmModule.forRootAsync({
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => ({
+        type: 'postgres',
+        host: config.database().host,
+        port: config.database().port,
+        username: config.database().user,
+        password: config.database().password,
+        database: config.database().name,
+        namingStrategy: new SnakeNamingStrategy(),
+        uuidExtension: 'pgcrypto',
+        autoLoadEntities: true,
+        synchronize: false, // False, luôn sử dụng migration
+      }),
+    }),
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
