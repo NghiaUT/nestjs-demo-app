@@ -36,6 +36,7 @@ import { Public } from '../common/decorators/public.decorator.js';
 import { User } from './schemas/user.schema.js';
 import { RoleGuard } from '../common/guards/role.guard.js';
 import { Role } from '../common/decorators/role.decorator.js';
+import { APP_VER } from '../common/constants/constants.js';
 
 export class ParamQueryDto {
   @IsOptional()
@@ -65,6 +66,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly configService: AppConfigService,
+    @Inject(APP_VER) private readonly appVersion: Record<string, string>,
   ) {}
 
   @Post()
@@ -75,9 +77,11 @@ export class UserController {
   @Get()
   @UseGuards(OwnershipGuard)
   @UseInterceptors(ExcludeNullInterceptor)
-  @Inject('APP_VER')
   @Public()
   async findAll(@Query() params: ParamQueryDto) {
+    console.log(
+      `App Version: ${this.appVersion.version} + ${this.appVersion.appName}`,
+    );
     const data = await this.userService.findAll(params);
     return data;
   }

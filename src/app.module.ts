@@ -16,13 +16,14 @@ import { AppConfigService } from './config/config.service.js';
 import { AppConfigModule } from './config/config.module.js';
 import { JwtAuthorizationGuard } from './common/guards/jwt-auth.guard.js';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_VER } from './common/constants/constants.js';
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          ttl: 60000,
+          ttl: 10000,
           limit: 5,
         },
       ],
@@ -50,10 +51,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     {
       provide: APP_GUARD,
       useClass: JwtAuthorizationGuard,
-    },
-    {
-      provide: 'APP_VER',
-      useValue: { appName: 'MyApp', version: '1.0.0' },
     },
     {
       provide: 'DATABASE_CONNECTION',

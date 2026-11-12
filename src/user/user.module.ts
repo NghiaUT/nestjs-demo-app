@@ -4,6 +4,7 @@ import { UserController } from './user.controller.js';
 import { AppConfigModule } from '../config/config.module.js';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema.js';
+import { AppInfoModule } from '../app-info/app-info.module.js';
 
 @Module({
   controllers: [UserController],
@@ -12,6 +13,7 @@ import { User, UserSchema } from './schemas/user.schema.js';
   imports: [
     AppConfigModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    AppInfoModule,
   ],
 })
 export class UserModule implements OnModuleInit, OnModuleDestroy {
