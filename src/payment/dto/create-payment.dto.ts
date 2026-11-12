@@ -1,5 +1,5 @@
-import { IsEnum, IsNumber, Min } from 'class-validator';
-import { PaymentMethod } from '../payment-method.enum.js';
+import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
+import { PaymentMethod } from '../payment.enum.js';
 
 export class CreatePaymentDto {
   @IsEnum(PaymentMethod)
@@ -8,4 +8,7 @@ export class CreatePaymentDto {
   @IsNumber()
   @Min(1)
   amount: number;
+
+  @IsString()
+  userId: string;
 }

@@ -19,20 +19,21 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { OrderModule } from './order/order.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategy';
+import { DatabaseModule } from './infrastructure/database/database.module.js';
+import { CacheModule } from './infrastructure/cache/cache.module.js';
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          ttl: 60000,
+          ttl: 10000,
           limit: 5,
         },
       ],
     }),
-    UserModule,
-    AuthModule,
-    PaymentModule,
+    DatabaseModule,
+    CacheModule,
     MongooseModule.forRootAsync({
       imports: [AppConfigModule],
       inject: [AppConfigService],
@@ -58,6 +59,9 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategy';
       }),
     }),
     OrderModule,
+    UserModule,
+    AuthModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
@@ -70,30 +74,10 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategy';
       provide: APP_GUARD,
       useClass: JwtAuthorizationGuard,
     },
-    {
-      provide: 'APP_VER',
-      useValue: { appName: 'MyApp', version: '1.0.0' },
-    },
-    {
-      provide: 'DATABASE_CONNECTION',
-      useFactory: async () => {
-        const connection = await createDBConnection();
-        console.log(connection);
-      },
-    },
-    {
-      provide: 'REDIS_CONNECTION',
-      useFactory: async (configService: AppConfigService) => {
-        const client = createRedisClient(configService.redis().url);
-        await client.connect(); // Mất khoảng 2 giây để kết nối thành công
-        return client;
-      },
-      inject: [AppConfigService],
-    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(VersionMiddleware).forRoutes('/users');
+    // consumer.apply(VersionMiddleware).forRoutes('/users');
   }
 }
