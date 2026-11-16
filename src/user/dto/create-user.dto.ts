@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -18,6 +19,7 @@ export class CreateUserDto {
   @IsNumber()
   age: number;
 
+  @IsEnum(Object.values(Department))
   department: Department;
 
   @IsBoolean()

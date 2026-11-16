@@ -1,19 +1,31 @@
-import { Logger, Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  forwardRef,
+  Logger,
+  Module,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { UserService } from './user.service.js';
 import { UserController } from './user.controller.js';
 import { AppConfigModule } from '../config/config.module.js';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema.js';
 import { AppInfoModule } from '../app-info/app-info.module.js';
+import { OrderModule } from '../order/order.module.js';
+import { OrderService } from '../order/order.service.js';
+import { Order } from '../order/entity/order.entity.js';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, OrderService],
   exports: [UserService, MongooseModule],
   imports: [
     AppConfigModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     AppInfoModule,
+    forwardRef(() => OrderModule),
+    TypeOrmModule.forFeature([Order]),
   ],
 })
 export class UserModule implements OnModuleInit, OnModuleDestroy {

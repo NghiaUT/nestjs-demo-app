@@ -5,13 +5,19 @@ import { type ParamQueryDto } from './user.controller.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema.js';
 import { Model, QueryFilter } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Order } from '../order/entity/order.entity.js';
+import { Repository } from 'typeorm';
 
 function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   console.log(`Method ${propertyKey} đã được đăng ký!`);
 }
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const createdUser = new this.userModel(createUserDto);
@@ -54,7 +60,10 @@ export class UserService {
   async findOne(id: string) {
     const user = await this.userModel.findById(id).exec();
     if (!user) throw new NotFoundException(`Không tìm thấy user với id #${id}`);
-    return user;
+    const orders = await this.orderRepo.find({
+      where: { customerName: user.name },
+    });
+    return { user, orders };
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

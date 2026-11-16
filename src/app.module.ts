@@ -35,7 +35,7 @@ import { CacheModule } from './infrastructure/cache/cache.module.js';
     DatabaseModule,
     CacheModule,
     MongooseModule.forRootAsync({
-      imports: [AppConfigModule],
+      // imports: [AppConfigModule],
       inject: [AppConfigService],
       useFactory: (appConfigService: AppConfigService) => ({
         uri: appConfigService.mongo().uri,

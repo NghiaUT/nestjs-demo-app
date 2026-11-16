@@ -10,12 +10,16 @@ import { CreateOrderDto } from './dto/create-order.dto.js';
 import { Product } from '../product/entity/product.entity.js';
 import { OrderItem } from './entity/order-item.entity.js';
 import { randomUUID } from 'crypto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../user/schemas/user.schema.js';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   async create(dto: CreateOrderDto): Promise<Order> {
@@ -92,14 +96,16 @@ export class OrderService {
   }
 
   async list(page = 1, limit = 20) {
-    const [data, total] = await this.orderRepo.findAndCount({
+    const [orders, total] = await this.orderRepo.findAndCount({
       relations: { items: true },
       order: { createdAt: 'DESC' },
       skip: limit * (page - 1),
       take: limit,
     });
 
-    return { data, total, page, limit };
+    const users = await this.userModel.find().select('-password').exec();
+
+    return { orders, users, total, page, limit };
   }
 
   async cancel(id: string): Promise<Order> {
