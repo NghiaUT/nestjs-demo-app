@@ -6,5 +6,5 @@ export class LoginRequestDto {
   email: string;
 
   @IsString()
-  password: number;
+  password: string;
 }

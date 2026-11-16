@@ -15,11 +15,12 @@ import { OrderModule } from '../order/order.module.js';
 import { OrderService } from '../order/order.service.js';
 import { Order } from '../order/entity/order.entity.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserRepository } from './repositories/user.repository.js';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, OrderService],
-  exports: [UserService, MongooseModule],
+  providers: [UserService, OrderService, UserRepository],
+  exports: [UserService, MongooseModule, UserRepository],
   imports: [
     AppConfigModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

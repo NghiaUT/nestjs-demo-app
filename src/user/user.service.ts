@@ -8,6 +8,7 @@ import { Model, QueryFilter } from 'mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '../order/entity/order.entity.js';
 import { Repository } from 'typeorm';
+import { UserRepository } from './repositories/user.repository.js';
 
 function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   console.log(`Method ${propertyKey} đã được đăng ký!`);
@@ -15,50 +16,22 @@ function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly userRepository: UserRepository,
     @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const createdUser = new this.userModel(createUserDto);
-    const savedUser = (await createdUser.save()).toObject();
-
-    const { password, ...user } = savedUser;
-    return {
-      user,
-      message: 'This action create a new user',
-    };
+  async create(createUserDto: CreateUserDto, passwordHash: string) {
+    return await this.userRepository.create({ ...createUserDto, passwordHash });
   }
 
   @Log
-  async findAll(params: ParamQueryDto) {
-    const filter: QueryFilter<User> = {};
-
-    if (params.name) {
-      filter.name = { $regex: params.name, $options: 'i' };
-    }
-
-    if (params.age) {
-      filter.age = params.age;
-    }
-
-    if (params.department) {
-      filter.department = params.department;
-    }
-
-    if (params.isManager !== undefined) {
-      filter.isManager = params.isManager;
-    }
-
-    return this.userModel
-      .find(filter)
-      .select('-password')
-      .sort({ createdAt: -1 })
-      .exec();
+  async findAll(params: ParamQueryDto, page: number = 1, limit: number = 10) {
+    return this.userRepository.findAll(params, page, limit);
   }
 
   async findOne(id: string) {
-    const user = await this.userModel.findById(id).exec();
+    const user = await this.userRepository.findById(id);
+    console.log(user);
     if (!user) throw new NotFoundException(`Không tìm thấy user với id #${id}`);
     const orders = await this.orderRepo.find({
       where: { customerName: user.name },
@@ -67,10 +40,7 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { runValidators: true })
-      .select('-password')
-      .exec();
+    const user = await this.userRepository.update(id, updateUserDto);
 
     if (!user) {
       throw new NotFoundException(`Không tìm thấy user với id #${id}`);
@@ -80,9 +50,9 @@ export class UserService {
   }
 
   async remove(id: string) {
-    const removeUser = await this.userModel.deleteOne({ _id: id }).exec();
+    const deletedCount = await this.userRepository.delete(id);
 
-    if (removeUser.deletedCount === 0) {
+    if (deletedCount === 0) {
       return `Không tìm thấy user với id #${id}`;
     }
 
@@ -92,11 +62,10 @@ export class UserService {
   }
 
   async findWithEmail(email: string) {
-    const user = await this.userModel
-      .findOne({ email: email })
-      .select('-password')
-      .exec();
-
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy user với email:  ${email}`);
+    }
     return user;
   }
 }

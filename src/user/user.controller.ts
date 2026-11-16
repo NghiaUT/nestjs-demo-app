@@ -69,10 +69,10 @@ export class UserController {
     @Inject(APP_VER) private readonly appVersion: Record<string, string>,
   ) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.userService.create(createUserDto);
-  }
+  // @Post()
+  // async create(@Body() createUserDto: CreateUserDto) {
+  //   return await this.userService.create(createUserDto);
+  // }
 
   @Get()
   @UseGuards(OwnershipGuard)

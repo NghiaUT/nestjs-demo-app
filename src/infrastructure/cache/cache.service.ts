@@ -33,7 +33,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     return {
       connect: async () => {
         console.log(`[Redis] createRedis Connection to ${redisUrl}....`);
-        await timeout(2000);
+        await timeout(100);
         console.log(`[Redis] Connection establised!`);
 
         return new Promise((resolve) => resolve());

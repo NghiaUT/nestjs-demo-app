@@ -24,7 +24,7 @@ export class User {
   isManager: boolean;
 
   @Prop({ required: true, select: true })
-  password: string;
+  passwordHash: string;
 
   @Prop({ default: 0, min: 0 })
   balance: number;
