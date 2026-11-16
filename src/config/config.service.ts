@@ -25,8 +25,14 @@ export class AppConfigService {
 
   jwt() {
     return {
-      secret: this.config.getOrThrow<string>('JWT_SECRET'),
-      expiresIn: this.config.getOrThrow<number>('JWT_EXPIRES_IN'),
+      access: {
+        secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
+        expiresIn: this.config.getOrThrow<number>('JWT_ACCESS_EXPIRES_IN'),
+      },
+      refresh: {
+        secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.config.getOrThrow<number>('JWT_REFRESH_EXPIRES_IN'),
+      },
     };
   }
 

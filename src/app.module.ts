@@ -21,6 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategy';
 import { DatabaseModule } from './infrastructure/database/database.module.js';
 import { CacheModule } from './infrastructure/cache/cache.module.js';
+import { AuthenticationModule } from '@nestjs/authentication';
 
 @Module({
   imports: [
@@ -58,6 +59,12 @@ import { CacheModule } from './infrastructure/cache/cache.module.js';
         synchronize: false, // False, luôn sử dụng migration
       }),
     }),
+    AuthenticationModule.forRoot({
+      session: {
+        absoluteTtl: '14d',
+        idleTtl: '3d',
+      },
+    }),
     OrderModule,
     UserModule,
     AuthModule,
@@ -70,10 +77,10 @@ import { CacheModule } from './infrastructure/cache/cache.module.js';
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthorizationGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthorizationGuard,
+    // },
   ],
 })
 export class AppModule implements NestModule {

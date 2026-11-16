@@ -32,11 +32,13 @@ import { OwnershipGuard } from '../common/guards/ownership.guard.js';
 import { TimeoutInterceptor } from '../common/interceptors/timeout.interceptor.js';
 import { ExcludeNullInterceptor } from '../common/interceptors/exclude-null.interceptor.js';
 import { AppConfigService } from '../config/config.service.js';
-import { Public } from '../common/decorators/public.decorator.js';
+// import { Public } from '../common/decorators/public.decorator.js';
 import { User } from './schemas/user.schema.js';
 import { RoleGuard } from '../common/guards/role.guard.js';
 import { Role } from '../common/decorators/role.decorator.js';
 import { APP_VER } from '../common/constants/constants.js';
+import { JwtAuthGuard } from '../common/guards/jwt.guard.js';
+import { Public } from '@nestjs/authentication';
 
 export class ParamQueryDto {
   @IsOptional()
@@ -58,8 +60,9 @@ export class ParamQueryDto {
   isManager?: boolean;
 }
 
+@Public()
 @UseInterceptors(TimeoutInterceptor)
-@UseGuards(JwtAuthorizationGuard)
+// @UseGuards(JwtAuthorizationGuard)
 @Controller('users')
 export class UserController {
   logger = new Logger(UserController.name);
@@ -76,8 +79,9 @@ export class UserController {
 
   @Get()
   @UseGuards(OwnershipGuard)
-  @UseInterceptors(ExcludeNullInterceptor)
-  @Public()
+  // @UseInterceptors(ExcludeNullInterceptor)
+  // @Public()
+  @UseGuards(JwtAuthGuard)
   async findAll(@Query() params: ParamQueryDto) {
     console.log(
       `App Version: ${this.appVersion.version} + ${this.appVersion.appName}`,
@@ -87,6 +91,8 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role(['ADMIN', 'SUPPORT'])
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
