@@ -18,6 +18,8 @@ export class HttpExcpetionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     // NOTICE: GLOBAL FILTER
     this.logger.debug('===[Error] TRIGGER GLOBAL FILTER===');
+    console.log('STACK:', exception.stack);
+    console.log('RESPONSE:', exception.getResponse());
     sendErrorResponse(response, status, exception.message);
   }
   logger = new Logger(HttpException.name);
